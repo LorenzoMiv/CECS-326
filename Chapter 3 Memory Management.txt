@@ -97,3 +97,5 @@
 			(NEED THIS PROCESS EXPLAINED) 
 			- Page table: page numbers are used to index into, which yields the number of the page frame corresponding to
 			 that virtual page 
+		Page Tables: 
+			- 
