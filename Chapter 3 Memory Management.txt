@@ -98,4 +98,162 @@
 			- Page table: page numbers are used to index into, which yields the number of the page frame corresponding to
 			 that virtual page 
 		Page Tables: 
+			- Virtual address is split into a virtual page number (high-order bits) and an offset (low-order bits). 
+				- Virtual page number is used as an index into the page table to find the entry for that virtual page
+				- Mathematically: Page table is a function, virtual page is an argument, physical frame is the result 
+						PT(VP) => PFr
+	ex:
+		a virtual address is brought in and the first 4 bits are referrencing the page table
+		say we have 0010 0000 0000 0100 we will reference 0010 -> 2 in the page table which points to 110 and have a present flag
+		that information, 110, is then copied to the outgoing physical address
+		the outgoing physical address has 110 and copies the remaining 12 bit offset, so we have: 
+			1100 0000 0000 0100
+
+		Structure of a Page Table Enrty: 
+			- Most important field is Page frame number
+
+		ex: 	|//////|caching disabled  |referenced  |modified  |protection  |Present/absent  |Page frame number			|
+			
+			- Present/Absent: if value is 0 then we have a page fault, meaning not in memory, if we have 1 the entry is valid
+			- Protection: determines the access permited, 0 is read/write, 1 is read only, can have 3 for determining read, write, exec
+			- Modified and Referenced: Track page usage
+				- modified: when a page is written to we have a 1, decides if the OS will reclaim the page frame
+					- if we do have a 1: it must be written back to memory otherwise it can be abandoned
+				- Referenced: set whenever a page is referenced, either for reading or for writing
+					- determines when the OS should evict a page due to a page fault 
+			- Caching Disabled: allows caching to be disabled for the page 
+		Speeding Up Paging: 
+			- Two issues are in any paging system: 
+				1) Mapping from virtual address to physical address must be fast
+					- We want our look up time to be fast so that we do not bottleneck 
+				2) If the virtual address space is large, the page table will be large
+		Translation Lookaside Buffers: 
+			- Most programs tend to make a large number of references to a small number of pages
+			- TLB: small hardware device for mapping virtual addresses to physical addresses without going through the page table 
+				- inside of the MMU and contains a small number of entries
+				- entries contain:
+					- information about one page
+					- virtual number page
+					- bit that is set when page is modified
+					- protection code
+					- physical page frame in which the page is located 
+			- A TLB to speed up paging: 
+		Valid		Virtual Page		Modified		Protection		Page Frame
+		1		140			1			RW			31
+		1		20			0			R   X			38
+		1		130			1			RW			29
+		1		129			1			RW			62
+		1		19			0			R   X			50
+		1		21			0			R   X			45
+		1		860			1			RW			14
+		1		881			1			RW			75
+			- when a Virtual address is given to the MMU, 
+			the hardware first checks to see if its virtual page number is present in the TLB by comparing it to all the entries in parallel
+			- If valid and access protection is not violated, the page frame is take directly from the TLB without going to the page table
+			- If protections are violated a page fault occurs
+			- When the MMU misses it does an ordinary page lookup and kicks out an entry from the TLB with the one it just looked up
+			- When the TLB is loaded from the page table, all the fields are taken from memory
+		Software TLB Management: 
+			- When a TLB miss occurs, instead of the MMU going to the page tables to find and fetch the needed page reference,
+			 it just generates a TLB fault and tosses the problem into the lab of the operating system. 
+				- system finds the page, removes the TLB entry, enters the new one, and restarts the instruction that faulted
+			-  Strategies for improving performance with TLB management software: 
+				1) attack both reducing TLB misses and reducing the cost of TLB miss when it does occur
+					a. operating systems can use its intution to figure out which 
+					pages are ilkely to be used next and to preoload entries for them in the TLB
+			- Normal strategy to process a TLB miss, 
+			go to the page table and perform the indexing operations to locate the page referenced
+				- problem: pages holding the page table may not be in the TLB, which will cause additional faults 
+				- solution: maintain a large software cashe of TLB entries in a fixed location 
+			- Soft Miss: When the page referenced is not in the TLB, but is in memory
+				- takes about 10-20 machine instructions
+			- Hard Miss: Occurs when the page itself is not in memory and not in the TLB, disk access is required
+				- extremely slow compared to soft miss
+			- Page Table Walk: Looking up mapping in the page table hierarchy
+			- Possibilities for misses: 
+				1) Minor page fault:
+					- the page may actually be in memory, but not in this process' page table
+					- no need to access disk again, just map the page appropriately
+				2) Major Page fault: 
+					- occurs if the page needs to be brought in from the disk
+				3) Segmentation fault: 
+					- the program simply accessed an invalid address and no mapping needs to be added in the TLB
+					- the operating system typically kills the program 
+		Page Tables for Large Memories: 
+			Multilevel Page Tables: 
+				- Keep all the page tables in memory all the time, in particular those that are not needed should not be kept
+			Inverted Page Tables: 
+				- Inverted Page Tables: one entry per page frame in real memory, 
+				   rather than one entry per page of virtual address space
+				- downside: virtual to physical translation becomes much harder, requiring a search on every memory reference 
+				- We use the TLB to circumvent this process as we can store highly used addresses in the TLB 
+				- searching can be simplified by using a hash table in order to search more efficiently
+	Page replacement Algorithms: 
+		- We want to make sure that we are not evicting pages that are being used frequently
+		The Optimal Page Replacement Algorithm: 
+			- The page with the highest labe should be removed
+				- meaning if one page will not be used for 8 million instructions and another page will not be used in 6 million, 
+				removing the former pushes the page fault that will fetch it back as far into the future as possible
+			- The OS has no way of knowing when each page of the pages will be referenced next
+		The Not Recently Used Page Replacement Algorithm: 
+			- Two status bits are used, R and M
+				- R: set whenever the page is referenced (read or written)
+				- M: set when the page is written to (modified)
+				- in every page table entry 
+				- hardware sets, OS resets
+			- When a process starts both R and M are set to 0
+			- Routinely, the R bit is cleared, to distinguish pages that have not been referenced recently from those that have been 
+			- When a fault occurs, OS inspects pages and divides them into four categories: 
+				1) Class 0: Not referenced, not modified
+				2) Class 1: not referenced, modified
+				3) referenced, not modified
+				4) referenced, modified
+			- NRU (Not Recently Used) Algorithm: removes a page at random from the lowest-numbered nonempty class
+		First-In, First-Out (FIFO) Page Replacement Algorithm: 
+			- OS maintains a list of all pages currently in memory, with the most recent arrival at the tail and the least recent at the head
+			- page fault, the page at the head is removed and the new page is added to the tail of the list 
+			- the oldest page may still be useful and have very relavent information
+		The Second-Change Page Replacement Algorithm: 
+			- Is like FIFO but inspects the R bit of the oldest page
+				- if 0: page is both old and unused, so replace
+				- if 1: the bit is cleared, the page is put onto the end of the list of pages, 
+				and it's load time is updated as though it had just arrived in memory 
+			- this is known as the second-chance algorithm because if a page is widely used it gets another chance to be in the list
+			- this algorithm seeks for a page that is not referenced and is an old page in the most recent clock interval
+			- if the algorithm iterates through the entire list, we will default to FIFO and remove the first one
+		The Clock Page Replacement Algorithm
+			- When a page fault occurs, the page the hand is pointing to is inspected
+				- if R = 0: evict the page
+				- if R = 1: clear R and advance the hand 
+			- repeat the process until a page is found with R=0
+		The Least Recently Used (LRU) Page Replacement Algorithm: 
+			- When a page fault occurs, throw out the page that has been unused for the longest time
+			- Need to maintain a linked list of all pages in memory, with the most recent used page at the front and least in the rear
+			- We can implement a counter to each page,
+			 so when a page fault occurs we reference the counter and remove the page with the least amount of counts 
+		Simulating LRU in Software: 
+			- Not Frequently Used (NFU): requires a software counter associated with each page, which is initially zero
+				- at each clock interrupt, the OS scans all the counters 
+				- the counter keeps track of how many times the page has been referrenced 
+				- lowest counter is chosen for replacement
+			- We make two modifications to NFU to get LRU: 
+				1) the counters are each shifted right 1 bit before the R bit is added in
+				2) the R bit is added to the leftmost rather than the rightmost bit 
+	R bits for Pages	R bits for Pages	R bits for Pages	R bits for Pages	R bits for Pages
+	0-5, clock tick 0	0-5, clock tick 1	0-5, clock tick 2	0-5, clock tick 3	0-5, clock tick 4
+	1|0|1|0|1|1		1|1|0|0|1|0		1|1|0|1|0|1		1|0|0|0|1|0		0|1|1|0|0|0
+page:
+0	1000 0000		1100 0000		1110 0000		1111 0000		0111 1000
+1	0000 0000		1000 0000		1100 0000		0110 0000		1011 0000
+2	1000 0000		0100 0000		0010 0000		0001 0000		1000 1000
+3	0000 0000		0000 0000		1000 0000		0100 0000		0010 0000
+4	1000 0000		1100 0000		0110 0000		1011 0000		0101 1000
+5	1000 0000		0100 0000		1010 0000		0101 0000		0010 1000
+
+	- we can notice the shift of the bits and the addition of either a 0 or 1 flag on the leftmost bit for each clock tick
+
+		The Working Set Page Replacement Algorithm
 			- 
+
+
+			
