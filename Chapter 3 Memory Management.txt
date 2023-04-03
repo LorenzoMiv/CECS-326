@@ -471,3 +471,34 @@ during this tick	|___________|		|
 											more physical memory	independent address spaces 
 															and to aid sharing and 
 															protection
+			- MULTICS provided each program wth a virtual memory of up to 2^18 segments
+			- MULTICS combined the advantages of paging and segmentation
+			- Each program had a segment table, with one descriptor per segment
+			- Addresses consisted of two parts: 
+				1) the segment 
+				2) address within the segment
+					- was further divided into a page
+				18					9			1 1 1	3	    3
+		|	Main Memory address		|	Segment length	| | |/ |Miscellaneous bit|Protection bit |	
+		|		of the page table		|	(in pages)		|^ ^
+ 												  |  |
+												  |  |_ 0 = segment page, 1 = segment not paged
+												  |_ page size: 0 = 1024 words, 1 = 64 words	
+			- Memory Reference algorithm: 
+				1) segment number was used to find the segment descriptor
+				2) A check was made to see if the segment's page table was in memory. If yes, it was located, if not, segment
+				fault occurs, if there was a protection violation a trap occurs
+				3) The page table entry for th requested virual page was examined, if the page was not in memory, a page fault
+				is triggered, if it was, the main-memory address of the start page was extracted 
+				4) The offset was added to the page origin to give the main memory address where the word was located
+				5) The read or store finally took place
+
+		Segmentation with Paging: Intell x86:
+			- Consists of two tables, LDT and GDT
+				- LDT (Local Descriptor Table) 
+					- every program has one
+					- describes segments local to each program
+				- GDT (Global Descriptor Table)
+					- only one 
+					- describes system segments, operating system itself
+			
