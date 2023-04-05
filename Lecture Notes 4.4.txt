@@ -1,0 +1,64 @@
+Notes for Lab 2: 
+- every character has its own C file and is run independently, we use the make file to compile them at the same time
+- the game file, and one for each character is in the make file
+- game file creates a fork command 
+- struct is the way that we are referencing the file 
+- treat dungeon.o as an API and the header files as the ones that access that API 
+- make the class handlers first (characters ) and test them with dummy data, we can use asserts 
+- characters have to work together and they will do that by having shared memory
+
+Lecture Notes: 
+- Memory Management and Deadlock are the subjects for the exam
+- Deadlocks are when things go wrong (hooray)
+- Preemptable and Nonpreemptable Resources: 
+	- preemptive resource can be used or shifted around by more than one thing and things be ok afterward, an example of this is RAM 
+		- give and take, with very little side effects 
+	- nonpreemptable: if we take something away it will not behave as expected
+	- Sequence of events required to use resources 
+		1) Request the resource
+		2) use the resource 
+		3) release the resource
+
+- Resource Acquisition: 
+
+	typedef int semaphore;		typedef int semaphore;
+	semaphore resource_1;		semaphore resource_1;
+							semaphore resource_2;
+
+	void process_A(void){		void process_A(void){
+		down(&resource_1);		down(&resource_1);
+		use_resource_1();			down(&resource_2);
+		up(&resource_1);			use_both_resources();
+	}							up(resource_2);
+								up(resource_1);
+							}
+- shows a semaphore to protect resources
+
+Slide 6.2 from book
+- difference is the resource calls 
+- creates a deadlock because A and B are downing resource 1 and 2 
+	- this creates a deadlock because A will attempt to down 2 but B already did and vice versa for 1 
+- semaphores have a problem when they scale because they are difficult to maintain 
+
+- Deadlock Definition
+	- A set of processes is deadlocked if: each process in the set waiting for an event, and that event can only be caused by another process 
+- Conditions for Resource Deadlocks
+	1) must enforce process mutual exclusion
+	2) hold and wait
+	3) no preemption 
+	4) circular wait condition - can ask for a resource that is being held by another process 
+	- deadlock may occur if all these are present
+Resource graph will be on the exam
+When a resource (square) has ownership of a process it points to the process (circle) 
+When a process (circle) requests a resource (square) it points to the resource (square) 
+
+Deadlock Modeling: 
+Strategies are used for dealing with deadlocks: 
+	1) Ignore the problem, maybe it will go away
+		- general purpose operating systems use this method
+	2) Detection and recovery. Let deadlocks occur, detect them, and take action
+	3) Dynamic avoidance by careful resource allocation
+	4) Prevention, By structurally negating one of the four required conditions
+	- certain systems require particular strategies and are specialized but may run into instances of when we need to use this
+
+

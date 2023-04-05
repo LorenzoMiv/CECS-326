@@ -275,7 +275,7 @@ page:
 			- Each entry contains two key items: approx time, and R referrence bit
 
 			Current Virtual Time: 		|	2204	|
-1:37 PM 4/2/20231:37 PM 4/2/2023
+
 			|	.	|
 			|	.	|
 			|	.	|
