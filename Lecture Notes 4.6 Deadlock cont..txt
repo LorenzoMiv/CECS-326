@@ -1,0 +1,51 @@
+- Recall:
+- Four Conditions for deadlock: (if present can occur)
+	1) enforce mutual exclusion
+	2) hold and wait 
+	3) no preemption (no bully process) 
+	4) circular wait condition 
+- Go over Algorithm to Detect Deadlocks
+- We can have the same resource of the same type
+	- like 5 devices that can be accessed and then something that is shared needs to get pulled 
+Example: E = (4	2	3	1)	A = (2 	1	0	0)
+		4 - Tape Drives			2 - Tape Drivers 			
+		2 - Plotters 				1 - Plotters 
+		3 - Scanners 				0 - Scanners
+		1 - CD Roms				0 - CD Roms
+
+Current Allocation: 				Request Matrix
+	0 0 1 0 					2 0 0 1
+C = 	2 0 0 1				R = 	1 0 1 0 
+	0 1 2 0 					2 1 0 0 
+
+Can create a need graph:  (what is requested vs what is allocated) 
+( 4 2 2 1) - how does this work? Now we have (2 1 0 0) -> (2 2 2 0) 
+	2 0 0 1		2 0 0 1		
+N = 	1 0 1 0 	=> 	1 0 1 0 	=> 
+	2 1 0 0 		0 0 0 0 
+Is this deadlocked? Can we resolve with the available resources? 
+
+Recovery from Deadlock:
+	- Possible methods (none are a good idea) : 
+		1) Preemption (allows for a process come in and resolve it by bullying a process) 
+			- we have to consider what it was taken from and what happens to that process 
+		2) Rollback (a snapshot that lets us redo it 
+			- no guarantee that deadlock won't happen again, we don't know how far to go back 
+		3) Killing Process 
+
+Deadlock Prevention:
+Assure one is never satisfied: 
+	- mutual exclusion -> eliminating leads to race conditions
+	- hold and wait -> we cannot use multiple instances because the resource is tied up 
+	- no preemption -> we would need to declare that certain processes get what it wants when it wants 
+	 could lead us to starvation or other things 
+	- circular wait -> if we had a text doc open in word and another like notepad wanted to open it, 
+	but the file would not be able to be accessed because the resource that would 
+	allow this is not able to do complete without this feature, 
+	the other process would not know that the other exists 
+
+LiveLock: 
+- functionally should be deadlock but trickier to find 
+- processes are not doing productive work, like handing the same data back and forth to one another 
+- creating an infinite loop with one another
+

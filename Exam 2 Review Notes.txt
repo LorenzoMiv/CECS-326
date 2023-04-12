@@ -1,0 +1,18 @@
+Semaphore has to accept things in the correct order, for like up and downing things
+How many semaphores do we need? The lock should be separate from the semaphore itself 
+Mutex is different from counting semaphore, will at least need two 
+
+Difference between deadlock and livelock, 
+Make sure you know the process of what deadlock is and how that differs from livelock 
+Deadlock: Processes cannot proceed because they are all waiting on something from one another 
+livelock: where a process keeps exchanging with another and they cannot finish their process 
+3 states to be aware of with resource trajectories: 1) safe, 2) danger zone 3) deadlock 
+Approximately half from each chapter
+Virtualbox is a hyper visor, something used to control a VM 
+Know difference between preemptive and non preemptive 
+Big question on conditions: like eliminating circular wait process A can wait for an event from process B and vice versa, so both processes can wait for one another
+Hold and Wait: process grabs a resource and holds onto it while it waits for another event
+Hold and wait allows for us to do multiple processes, if we dont have it we can only do one file at a time 
+No preemption: no bully, one can't come in and take whichever process it needs all the time 
+Mutual Exclusion: no more than one process can enter its critical region at the same time as another 
+Why do we ignore deadlock: easiest thing to do because it's infrequent, and it requires a lot of work to figure out, use cases are different so we leave it alone, essentially
